@@ -137,7 +137,7 @@ const material = new THREE.ShaderMaterial({
   side: THREE.DoubleSide,
 });
 const gridMesh = new THREE.Mesh(geometry, material);
-scene.add(gridMesh);
+app.object.add(gridMesh);
 
 physics.addGeometry(gridMesh);
 
