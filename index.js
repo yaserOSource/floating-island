@@ -3,6 +3,11 @@ import {BufferGeometryUtils} from 'BufferGeometryUtils';
 import {scene, renderer, camera, runtime, world, physics, ui, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
 
+const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
+// const localVector2D = new THREE.Vector2();
+// const localVector2D2 = new THREE.Vector2();
+
 class MultiSimplex {
   constructor(seed, octaves) {
     const simplexes = Array(octaves);
@@ -17,6 +22,7 @@ class MultiSimplex {
       const simplex = this.simplexes[i];
       result += simplex.noise2D(x * (2**i), z * (2**i));
     }
+    // result /= this.simplexes.length;
     return result;
   }
 }
@@ -24,18 +30,42 @@ class MultiSimplex {
 const simplex = new MultiSimplex('lol', 6);
 
 const geometry = (() => {
-  const topGeometry = new THREE.PlaneBufferGeometry(32, 32, 32, 32);
+	const s = 32;
+	// const maxManhattanDistance = localVector2D.set(0, 0).manhattanDistanceTo(localVector2D2.set(s/2, s/2));
+	const maxDistance = localVector.set(s/2, s/2, 0).length();
 
-  const bottomGeometry = new THREE.PlaneBufferGeometry(32, 32, 32, 32);
-	bottomGeometry.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))));
+  const topGeometry = new THREE.PlaneBufferGeometry(s, s, s, s)
+    .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))));
+
+  const bottomGeometry = new THREE.PlaneBufferGeometry(s, s, s, s);
+  const lines = [
+    new THREE.Line3(new THREE.Vector3(-s/2, -s/2, 0), new THREE.Vector3(-s/2, s/2, 0)),
+    new THREE.Line3(new THREE.Vector3(-s/2, s/2, 0), new THREE.Vector3(s/2, s/2, 0)),
+    new THREE.Line3(new THREE.Vector3(s/2, s/2, 0), new THREE.Vector3(s/2, -s/2, 0)),
+    new THREE.Line3(new THREE.Vector3(s/2, -s/2, 0), new THREE.Vector3(-s/2, -s/2, 0)),
+  ];
+  const _closestDistanceToLine = (x, y) => {
+  	localVector.set(x, y, 0);
+  	let result = Infinity;
+    for (const line of lines) {
+    	const point = line.closestPointToPoint(localVector, true, localVector2);
+    	const d = localVector.distanceTo(point);
+    	if (d < result) {
+        result = d;
+    	}
+    }
+    return result;
+  };
 	for (let i = 0; i < bottomGeometry.attributes.position.array.length; i += 3) {
-	  let x = bottomGeometry.attributes.position.array[i];
-	  let z = bottomGeometry.attributes.position.array[i+2];
-	  x /= 100;
-	  z /= 100;
-	  const y = simplex.noise2D(x, z) * 0.5;
-	  bottomGeometry.attributes.position.array[i+1] = y;
+	  const x = bottomGeometry.attributes.position.array[i];
+	  const y = bottomGeometry.attributes.position.array[i+1];
+	  // console.log('got simplex', simplex.noise2D(x, y));
+	  const d = _closestDistanceToLine(x, y); // localVector2D.set(x, y).manhattanDistanceTo(localVector2D2);
+	  const z = (10 + simplex.noise2D(x/100, y/100)) * (d/maxDistance)**0.5;
+	  // console.log('got distance', z, d/maxDistance);
+	  bottomGeometry.attributes.position.array[i+2] = z;
 	}
+	bottomGeometry.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, -1, 0))));
 
 	let geometry = BufferGeometryUtils.mergeBufferGeometries([
 		topGeometry,
@@ -57,8 +87,6 @@ const geometry = (() => {
 	}
 	geometry.setAttribute('barycentric', new THREE.BufferAttribute(barycentrics, 3));
 
-	console.log('got real geo', geometry);
-	// return bottomGeometry;
 	return geometry;
 })();
 
@@ -106,6 +134,7 @@ const material = new THREE.ShaderMaterial({
       gl_FragColor = vec4(c * (gridFactor(vBarycentric, 0.5) < 0.5 ? 0.9 : 1.0), 1.0);
     }
   `,
+  side: THREE.DoubleSide,
 });
 const gridMesh = new THREE.Mesh(geometry, material);
 scene.add(gridMesh);
