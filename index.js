@@ -139,7 +139,10 @@ const material = new THREE.ShaderMaterial({
 const gridMesh = new THREE.Mesh(geometry, material);
 app.object.add(gridMesh);
 
-physics.addGeometry(gridMesh);
+const physicsId = physics.addGeometry(gridMesh);
+app.addEventListener('unload', () => {
+  physics.removeGeometry(physicsId);
+});
 
 /* renderer.setAnimationLoop(() => {
   planetUpdate();
