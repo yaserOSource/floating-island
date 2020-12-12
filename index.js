@@ -39,13 +39,13 @@ const geometry = (() => {
   const topGeometry = new THREE.PlaneBufferGeometry(s, s, s, s)
     .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))));
 
-  for (let i = 0; i < topGeometry.attributes.uv.array.length; i += 2) {
+  /* for (let i = 0; i < topGeometry.attributes.uv.array.length; i += 2) {
     const x = topGeometry.attributes.position.array[i/2*3];
 	  const y = topGeometry.attributes.position.array[i/2*3+2];
     
 	  topGeometry.attributes.uv.array[i] += -1/s/7 + simplex2.noise2D(x/10, y/10) * 1/s/7*2;
 	  topGeometry.attributes.uv.array[i+1] += -1/s/7 + simplex3.noise2D(x/10, y/10) * 1/s/7*2;
-	}
+	} */
 
   const bottomGeometry = new THREE.PlaneBufferGeometry(s, s, s, s);
   const lines = [
@@ -100,7 +100,7 @@ const geometry = (() => {
 	return geometry;
 })();
 
-const texBase = 'Vol_47_ground_7';
+const texBase = 'vol_2_2';
 
 const map = new THREE.Texture();
 map.wrapS = THREE.RepeatWrapping;
@@ -317,7 +317,7 @@ const material = new THREE.ShaderMaterial({
     const vec3 lineColor2 = vec3(${new THREE.Color(0xff7043).toArray().join(', ')});
     const vec3 sunDirection = normalize(vec3(-1, -2, -3));
     void main() {
-      vec3 normal = normalize(cross(dFdx(eyeVec.xyz), dFdy(eyeVec.xyz)));
+      vec3 normal = normalize(-cross(dFdx(eyeVec.xyz), dFdy(eyeVec.xyz)));
       vec2 mapUv = perturbUv( -vViewPosition, normal, normalize( vViewPosition ) );
       
       vec4 c1 = texture2D( map, mapUv );
