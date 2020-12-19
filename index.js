@@ -140,9 +140,9 @@ const gridMesh = new THREE.Mesh(geometry, material);
 app.object.add(gridMesh);
 
 const physicsId = physics.addGeometry(gridMesh);
-app.addEventListener('unload', () => {
+/* app.addEventListener('unload', () => {
   physics.removeGeometry(physicsId);
-});
+}); */
 
 /* renderer.setAnimationLoop(() => {
   planetUpdate();
