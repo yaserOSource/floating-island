@@ -3,7 +3,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 // import {scene, renderer, camera, runtime, world, physics, ui, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
 import metaversefile from 'metaversefile';
-const {usePhysics, useCleanup} = metaversefile;
+const {useApp, usePhysics, useCleanup} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -35,6 +35,8 @@ const simplex3 = new MultiSimplex('lol3', 3);
 const baseUrl = import.meta.url.replace(/(\/)[^\/\/]*$/, '$1');
 
 export default () => {
+  const app = useApp();
+  
   const geometry = (() => {
     const s = 32;
     // const maxManhattanDistance = localVector2D.set(0, 0).manhattanDistanceTo(localVector2D2.set(s/2, s/2));
@@ -389,9 +391,10 @@ export default () => {
     // lights: true,
   });
   const gridMesh = new THREE.Mesh(geometry, material);
-  // app.object.add(gridMesh);
+  app.add(gridMesh);
 
-  const physicsId = usePhysics().addGeometry(gridMesh);
+  const physics = usePhysics();
+  const physicsId = physics.addGeometry(gridMesh);
   useCleanup(() => {
     physics.removeGeometry(physicsId);
   });
@@ -400,5 +403,5 @@ export default () => {
     planetUpdate();
   }); */
 
-  return gridMesh;
+  return app;
 };
