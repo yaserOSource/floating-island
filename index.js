@@ -330,6 +330,7 @@ export default () => {
         vec3 c2 = mix(lineColor1, lineColor2, 1. + vPosition.y);
         float fLight = -dot(vNormal, sunDirection);
         gl_FragColor = vec4((c1.rgb + c2 * 0.3 * min(gl_FragCoord.z/gl_FragCoord.w/50.0, 1.0)) * (0.5 + fLight), c1.a);
+        gl_FragColor = sRGBToLinear(gl_FragColor);
       }
     `,
     
