@@ -272,6 +272,7 @@ export default () => {
       }
     `,
     fragmentShader: `\
+      #include <common>
       precision highp float;
       precision highp int;
 
