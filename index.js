@@ -11,6 +11,11 @@ const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 // const localVector2D = new THREE.Vector2();
 // const localVector2D2 = new THREE.Vector2();
+console.log(logdepthbuf_fragmentGlsl)
+console.log(logdepthbuf_pars_fragmentGlsl)
+console.log(logdepthbuf_vertexGlsl)
+console.log(logdepthbuf_pars_vertexGlsl)
+
 
 class MultiSimplex {
   constructor(seed, octaves) {
@@ -142,6 +147,7 @@ export default () => {
   }
   const heightMap = new THREE.Texture();
   heightMap.wrapS = THREE.RepeatWrapping;
+  debugger;
   heightMap.wrapT = THREE.RepeatWrapping;
   {
     const img = new Image();
