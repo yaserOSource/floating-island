@@ -251,7 +251,14 @@ export default () => {
       ${THREE.ShaderChunk["common"]}
       precision highp float;
       precision highp int;
-      ${THREE.ShaderChunk[ "logdepthbuf_pars_vertex" ]}
+      #ifdef USE_LOGDEPTHBUF
+      #ifdef USE_LOGDEPTHBUF_EXT
+        varying float vFragDepth;
+        varying float vIsPerspective;
+      #else
+        uniform float logDepthBufFC;
+      #endif
+    #endif
       uniform sampler2D normalMap;
       varying vec3 vPosition;
       varying vec2 vUv;
@@ -273,14 +280,26 @@ export default () => {
         vNormal = normalize( texture2D( normalMap, vUv ).rgb );
         gl_Position = projectionMatrix * mvPosition;
         eyeVec = vViewPosition.xyz;
-        ${THREE.ShaderChunk[ "logdepthbuf_vertex" ]}
+        #ifdef USE_LOGDEPTHBUF
+        #ifdef USE_LOGDEPTHBUF_EXT
+          vFragDepth = 1.0 + gl_Position.w;
+          vIsPerspective = 1;
+        #else
+            gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
+            gl_Position.z *= gl_Position.w;
+        #endif
+      #endif
       }
     `,
     fragmentShader: `\
       precision highp float;
       precision highp int;
 
-      ${THREE.ShaderChunk[ "logdepthbuf_pars_fragment" ]}
+      #if defined( USE_LOGDEPTHBUF ) && defined( USE_LOGDEPTHBUF_EXT )
+        uniform float logDepthBufFC;
+        varying float vFragDepth;
+        varying float vIsPerspective;
+      #endif
 
       uniform sampler2D bumpMap;
       uniform sampler2D map;
@@ -341,7 +360,11 @@ export default () => {
         gl_FragColor = vec4((c1.rgb + c2 * 0.3 * min(gl_FragCoord.z/gl_FragCoord.w/50.0, 1.0)) * (0.5 + fLight), c1.a);
         gl_FragColor = sRGBToLinear(gl_FragColor);
 
-        ${THREE.ShaderChunk[ "logdepthbuf_fragment" ]}
+        #if defined( USE_LOGDEPTHBUF ) && defined( USE_LOGDEPTHBUF_EXT )
+          // Doing a strict comparison with == 1.0 can cause noise artifacts
+          // on some platforms. See issue #17623.
+          gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2( vFragDepth ) * logDepthBufFC * 0.5;
+        #endif
       }
     `,
     
