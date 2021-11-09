@@ -250,7 +250,7 @@ export default () => {
     vertexShader: `\
       precision highp float;
       precision highp int;
-
+      ${THREE.ShaderChunk[ "logdepthbuf_pars_vertex" ]}
       uniform sampler2D normalMap;
       varying vec3 vPosition;
       varying vec2 vUv;
@@ -267,11 +267,14 @@ export default () => {
         vNormal = normalize( texture2D( normalMap, vUv ).rgb );
         gl_Position = projectionMatrix * mvPosition;
         eyeVec = vViewPosition.xyz;
+        ${THREE.ShaderChunk[ "logdepthbuf_vertex" ]}
       }
     `,
     fragmentShader: `\
       precision highp float;
       precision highp int;
+
+      ${THREE.ShaderChunk[ "logdepthbuf_pars_fragment" ]}
 
       uniform sampler2D bumpMap;
       uniform sampler2D map;
@@ -331,6 +334,8 @@ export default () => {
         float fLight = -dot(vNormal, sunDirection);
         gl_FragColor = vec4((c1.rgb + c2 * 0.3 * min(gl_FragCoord.z/gl_FragCoord.w/50.0, 1.0)) * (0.5 + fLight), c1.a);
         gl_FragColor = sRGBToLinear(gl_FragColor);
+
+        ${THREE.ShaderChunk[ "logdepthbuf_fragment" ]}
       }
     `,
     
