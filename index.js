@@ -248,7 +248,7 @@ export default () => {
       }, */
     },
     vertexShader: `\
-      #include <common>
+      ${THREE.ShaderChunk["common"]}
       precision highp float;
       precision highp int;
       ${THREE.ShaderChunk[ "logdepthbuf_pars_vertex" ]}
@@ -272,7 +272,6 @@ export default () => {
       }
     `,
     fragmentShader: `\
-      #include <common>
       precision highp float;
       precision highp int;
 
