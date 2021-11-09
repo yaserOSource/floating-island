@@ -258,6 +258,13 @@ export default () => {
       varying vec3 vViewPosition;
       varying vec3 vNormal;
       varying vec3 eyeVec;
+
+      bool isPerspectiveMatrix( mat4 m ) {
+          return projectionMatrix[ 2 ][ 3 ] == - 1.0;
+          return m[ 2 ][ 3 ] == - 1.0;
+        }
+      }
+      
       void main() {
         vPosition = position;
         vUv = uv * 10.;
