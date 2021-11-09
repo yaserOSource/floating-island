@@ -3,19 +3,12 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 // import {scene, renderer, camera, runtime, world, physics, ui, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
 import metaversefile from 'metaversefile';
-import { logdepthbuf_fragmentGlsl, logdepthbuf_pars_fragmentGlsl, logdepthbuf_vertexGlsl, logdepthbuf_pars_vertexGlsl } from './logdepthbuf/index.js';
-
 const {useApp, usePhysics, useCleanup} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 // const localVector2D = new THREE.Vector2();
 // const localVector2D2 = new THREE.Vector2();
-console.log(logdepthbuf_fragmentGlsl)
-console.log(logdepthbuf_pars_fragmentGlsl)
-console.log(logdepthbuf_vertexGlsl)
-console.log(logdepthbuf_pars_vertexGlsl)
-
 
 class MultiSimplex {
   constructor(seed, octaves) {
@@ -147,7 +140,6 @@ export default () => {
   }
   const heightMap = new THREE.Texture();
   heightMap.wrapS = THREE.RepeatWrapping;
-  debugger;
   heightMap.wrapT = THREE.RepeatWrapping;
   {
     const img = new Image();
@@ -258,14 +250,13 @@ export default () => {
     vertexShader: `\
       precision highp float;
       precision highp int;
-     ${logdepthbuf_pars_vertexGlsl}
+
       uniform sampler2D normalMap;
       varying vec3 vPosition;
       varying vec2 vUv;
       varying vec3 vViewPosition;
       varying vec3 vNormal;
       varying vec3 eyeVec;
-      
       void main() {
         vPosition = position;
         vUv = uv * 10.;
@@ -276,15 +267,11 @@ export default () => {
         vNormal = normalize( texture2D( normalMap, vUv ).rgb );
         gl_Position = projectionMatrix * mvPosition;
         eyeVec = vViewPosition.xyz;
-        
-        ${logdepthbuf_vertexGlsl}
       }
     `,
     fragmentShader: `\
       precision highp float;
       precision highp int;
-
-      ${logdepthbuf_pars_fragmentGlsl}
 
       uniform sampler2D bumpMap;
       uniform sampler2D map;
@@ -344,8 +331,6 @@ export default () => {
         float fLight = -dot(vNormal, sunDirection);
         gl_FragColor = vec4((c1.rgb + c2 * 0.3 * min(gl_FragCoord.z/gl_FragCoord.w/50.0, 1.0)) * (0.5 + fLight), c1.a);
         gl_FragColor = sRGBToLinear(gl_FragColor);
-
-        ${logdepthbuf_fragmentGlsl}
       }
     `,
     
