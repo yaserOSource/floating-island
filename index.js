@@ -402,7 +402,7 @@ export default () => {
   });
   const gridMesh = new THREE.Mesh(geometry, material);
   app.add(gridMesh);
-
+  app.updateMatrix();
   const physics = usePhysics();
   const physicsId = physics.addGeometry(gridMesh);
   useCleanup(() => {
